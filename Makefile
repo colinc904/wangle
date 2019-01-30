@@ -22,8 +22,16 @@ export DOCDIR = $(TOPDIR)/doc
 #  User-facing rules
 # --------------------------------------------------------------------
 
+WEB = doc/wangle.nw
+
 .PHONY: build
 build:			## build the fsm program
+	wangle code $(WEB) patterns.nim src/wanglepkg/patterns.nim
+	wangle code $(WEB) chunk.nim src/wanglepkg/chunk.nim
+	wangle code $(WEB) clump.nim src/wanglepkg/clump.nim
+	wangle code $(WEB) tangleresult.nim src/wanglepkg/tangleresult.nim
+	wangle code $(WEB) web.nim src/wanglepkg/web.nim
+	wangle code $(WEB) cli.nim src/wangle.nim
 	nimble build
 
 .PHONY: clean

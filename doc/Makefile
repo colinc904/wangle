@@ -3,6 +3,7 @@ all:
 
 .PHONY: doc
 doc:
+	wangle doc wangle.nw
 	doxygen Doxyfile
 
 .PHONY: clean

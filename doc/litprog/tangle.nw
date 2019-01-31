@@ -1,0 +1,79 @@
+## Tangle
+
+<<handle web-related commands>>=
+if args["tangle"]:
+  var filename: string
+
+  if args["OUTPUT"]:
+    filename = $(args["OUTPUT"])
+  else:
+    filename = $(args["CHUNK"])
+
+  let output = newFileStream(filename, fmWrite)
+  if isNil(output):
+    raise newException(IOError, &"failed to open {filename}")
+  the_web.tangle($args["CHUNK"], output)
+  close(output)
+  
+@
+
+<<web>>=
+proc tangleClump(
+  self: Web,
+  name: string,
+  context: Context,
+  output: Stream
+) =
+  for item in self.code[name].tangle():
+    case item.kind
+    of simple:
+      output.writeLine(context.indent & item.text)
+    of inclusion:
+      if item.name in context:
+        raise newException(Exception, &"recursive incluing {item.name}")
+      let nestedContext = newContext(
+        item.name,
+        item.line,
+        context.indent & item.indent,
+        context
+      )
+      self.tangleClump(item.name, nestedContext, output)
+
+
+proc tangle*(self: Web, name: string, output: Stream) =
+  let rootContext = newContext(name, 0, "")
+  self.tangleClump(name, rootContext, output)
+
+@
+
+<<clump>>=
+iterator tangle*(self: Clump): TangleResult =
+  for chunk in self.chunks:
+    for whatever in chunk.tangle():
+      yield whatever
+
+@
+
+<<chunk>>=
+iterator tangle*(self: Chunk): TangleResult =
+  var line = self.line
+  for text in self.body:
+    let codeInclude = text.match(CODE_INCLUDE)
+    if isSome(codeInclude):
+      yield TangleResult(
+        kind:    inclusion,
+        line:    line,
+        indent:  get(codeInclude).captures[0],
+        name:    get(codeInclude).captures[1],
+        postfix: get(codeInclude).captures[2]
+      )
+    else:
+      yield TangleResult(
+        kind: simple,
+        text: text
+      )
+    line += 1
+
+@
+
+

@@ -1,0 +1,77 @@
+# Odds and Sods
+
+<<wangle.nim>>=
+# <<LICENCE>>
+
+import ospaths
+import streams
+import strformat
+import docopt
+
+import wanglepkg/chunk
+import wanglepkg/web
+
+<<usage>>
+<<cli>>
+@
+
+<<wanglepkg/chunk.nim>>=
+# <<LICENCE>>
+
+import nre
+import streams
+import strformat
+import patterns
+import tangleresult
+
+<<chunk types>>
+<<chunk>>
+@
+
+<<wanglepkg/clump.nim>>=
+# <<LICENCE>>
+
+import sets
+import streams
+
+import chunk
+import tangleresult
+import patterns
+
+<<clump types>>
+<<clump>>
+@
+
+
+<<wanglepkg/web.nim>>=
+# <<LICENCE>>
+
+import nre
+import streams
+import strformat
+import tables
+
+import chunk
+import clump
+import tangleresult
+import patterns
+
+<<web types>>
+<<web>>
+@
+
+<<wanglepkg/patterns.nim>>=
+# <<LICENCE>>
+
+import nre
+
+let
+  <<patterns>>
+@
+
+<<wanglepkg/tangleresult.nim>>=
+# <<LICENCE>>
+
+<<tangleresult>>
+@
+

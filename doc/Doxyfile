@@ -109,6 +109,7 @@ WARN_LOGFILE           =
 USE_MDFILE_AS_MAINPAGE = ../README.md
 INPUT                  = ../README.md
 INPUT                 += ./pages
+INPUT                 += ./woven
 INPUT_ENCODING         = UTF-8
 FILE_PATTERNS          = *.md
 RECURSIVE              = YES

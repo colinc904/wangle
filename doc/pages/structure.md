@@ -6,81 +6,40 @@ class Chunk {
   line
   name
   body
-  newChunk(line, name)
-  isCode()
   add(text)
-  doc(output)
-  code(context, output)
   inclusions()
+  isCode()
+  newChunk(line, name)
+  tangle()
+  weave(output)
 }
 
 class Clump {
   chunks
-  includedBy
-  initClump()
+  includers
   add(chunk)
-  write(context, output)
+  includedBy(includer)
   inclusions()
-  includedBy(name)
   isRoot()
-}
-
-class Code {
-  clumps
-  initCode()
-  add(chunk)
-  digest()
-  write(name, context, output)
-  roots()
-}
-
-class Context {
-  name
-  line
-  indent
-  context
-  newContext(name, line, indent, context)
-  contains(name)
-  trace(context, msg)
-}
-
-class Doc {
-  chunks
-  initDoc()
-  read(input)
-  write(output)
-  items()
-}
-
-class Inclusion {
-  name
-  line
-  indent
-  trace(name)
+  newClump()
+  tangle()
 }
 
 class Web {
   doc
   code
-  initWeb()
-  read(input)
   digest()
-  doc(output)
-  code(name, output)
+  newWeb()
+  read(input)
   roots()
+  tangle(name, output)
+  tangleClump(name, context, output)
+  weave(output)
 }
 
 Clump o-- Chunk
-Clump *-- Inclusion
 
-Code *-- Clump
-Code *-- Context
-
-Doc *-- Chunk
-
-Web *-- Code
-
-Web *-- Doc
-Web *-- Context
+Web *-- Clump 
+Web *-- Chunk
 
 @enduml

@@ -23,19 +23,25 @@ export DOCDIR = $(TOPDIR)/doc
 # --------------------------------------------------------------------
 
 WEB = doc/wangle.nw
+WANGLE = ./wangle
+TANGLE = $(WANGLE) tangle
+ROOTS = $(WANGLE) roots
+
+.PHONY: tangle
+tangle:
+	cat doc/litprog/*.nw >./tmp.nw
+	for f in $$($(ROOTS) tmp.nw); \
+	do \
+		$(TANGLE) tmp.nw $$f src/$$f; \
+	done
 
 .PHONY: build
 build:			## build the fsm program
-	wangle code $(WEB) patterns.nim src/wanglepkg/patterns.nim
-	wangle code $(WEB) chunk.nim src/wanglepkg/chunk.nim
-	wangle code $(WEB) clump.nim src/wanglepkg/clump.nim
-	wangle code $(WEB) tangleresult.nim src/wanglepkg/tangleresult.nim
-	wangle code $(WEB) web.nim src/wanglepkg/web.nim
-	wangle code $(WEB) cli.nim src/wangle.nim
 	nimble build
 
 .PHONY: clean
 clean:			## remove generated files
+	-rm -f tmp.nw
 	$(MAKE) -C doc clean
 #	$(MAKE) -C tests clean
 

@@ -1,0 +1,24 @@
+## roots
+
+<<handle web-related commands>>=
+if args["roots"]:
+  for name in theWeb.roots:
+    stdout.writeLine(name)
+
+@
+
+<<web>>=
+iterator roots*(self: Web): string =
+  for name, clump in self.code:
+    if self.code[name].isRoot:
+      yield name
+  
+@
+
+<<clump>>=
+proc isRoot*(self: Clump): bool =
+  result = (len(self.includers) == 0)
+
+@
+
+

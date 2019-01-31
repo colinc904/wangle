@@ -3,9 +3,16 @@ all:
 
 .PHONY: doc
 doc:
-	wangle doc wangle.nw
 	doxygen Doxyfile
 
 .PHONY: clean
 clean:
 	-rm -rf html
+
+WEAVE = ../wangle weave
+.PHONY: weave
+weave:
+	for f in litprog/*.nw; \
+	do \
+		$(WEAVE) $$f woven/$$(basename $$f).md; \
+	done

@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['structure_20diagram',['Structure Diagram',['../structure.html',1,'']]]
+  ['notitle',['notitle',['../index.html',1,'']]]
 ];

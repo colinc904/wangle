@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.15"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Wangle: a Tool for Literate Programming: Structure Diagram</title>
+<title>Wangle: a Tool for Literate Programming: $title</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -60,19 +60,16 @@ $(function() {
 </div>
 
 </div><!-- top -->
-<div class="PageDoc"><div class="header">
-  <div class="headertitle">
-<div class="title">Structure Diagram </div>  </div>
-</div><!--header-->
-<div class="contents">
+<div class="PageDoc"><div class="contents">
 <div class="textblock"><div class="plantumlgraph">
 <img src="inline_umlgraph_1.png" />
 </div>
- </div></div><!-- PageDoc -->
+<h2>Object Structure</h2>
+<div class="fragment"><div class="line">&lt;&lt;web types&gt;&gt;=</div><div class="line">type Web* = ref object</div><div class="line">  doc: seq[Chunk]</div><div class="line">  code: TableRef[string, Clump]</div><div class="line"></div><div class="line">type Context = ref object</div><div class="line">  name: string</div><div class="line">  line: int</div><div class="line">  indent: string</div><div class="line">  context: Context</div><div class="line"></div><div class="line">proc newContext(</div><div class="line">  name: string,</div><div class="line">  line: int,</div><div class="line">  indent: string = &quot;&quot;,</div><div class="line">  context: Context = nil</div><div class="line">): Context =</div><div class="line">  new(result)</div><div class="line">  result.name = name</div><div class="line">  result.line = line</div><div class="line">  result.indent = indent</div><div class="line">  result.context = context</div><div class="line"></div><div class="line">proc contains*(self: Context, name: string): bool =</div><div class="line">  if self.name == name:</div><div class="line">    return true</div><div class="line">  elif self.context.isNil:</div><div class="line">    return false</div><div class="line">  else:</div><div class="line">    return self.context.contains(name)</div></div><!-- fragment --><div class="fragment"><div class="line">&lt;&lt;clump types&gt;&gt;=</div><div class="line">type Clump* = ref object</div><div class="line">  chunks:    seq[Chunk]</div><div class="line">  includers: HashSet[string]</div><div class="line"></div><div class="line">proc newClump*(): Clump =</div><div class="line">  new(result)</div><div class="line">  result.chunks = @[]</div><div class="line">  result.includers.init()</div><div class="line"></div><div class="line">proc add*(self: Clump, chunk: Chunk) =</div><div class="line">  self.chunks.add(chunk)</div></div><!-- fragment --><div class="fragment"><div class="line">&lt;&lt;chunk types&gt;&gt;=</div><div class="line">type Chunk* = ref object</div><div class="line">  line:  int</div><div class="line">  name*: string</div><div class="line">  body:  seq[string]</div><div class="line"></div><div class="line">proc newChunk*(line: int, name: string = &quot;&quot;): Chunk =</div><div class="line">  new(result)</div><div class="line">  result.line = line</div><div class="line">  result.name = name</div><div class="line">  result.body = @[]</div><div class="line"></div><div class="line">proc isCode*(self: Chunk): bool =</div><div class="line">  result = (len(self.name) &gt; 0)</div></div><!-- fragment --><div class="fragment"><div class="line">&lt;&lt;tangleresult&gt;&gt;=</div><div class="line">type ResultKind* = enum</div><div class="line">  simple,</div><div class="line">  inclusion</div><div class="line"></div><div class="line">type TangleResult* = object</div><div class="line">  case kind*: ResultKind</div><div class="line">  of simple:</div><div class="line">    text*: string</div><div class="line">  of inclusion:</div><div class="line">    line*:    int</div><div class="line">    indent*:  string</div><div class="line">    name*:    string</div><div class="line">    postfix*: string</div></div><!-- fragment --> </div></div><!-- PageDoc -->
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Jan 31 2019 09:31:43 for Wangle: a Tool for Literate Programming by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Fri Feb 1 2019 09:03:51 for Wangle: a Tool for Literate Programming by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.15
 </small></address>

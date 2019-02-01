@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.15"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Wangle: a Tool for Literate Programming: Main Page</title>
+<title>Wangle: a Tool for Literate Programming: How to use GitHub Pages for documentation</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -45,7 +45,6 @@ $(function() {
 });
 /* @license-end */</script>
 <div id="main-nav"></div>
-</div><!-- top -->
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -60,27 +59,28 @@ $(function() {
 </iframe>
 </div>
 
-<div class="PageDoc"><div class="contents">
-<div class="textblock"><h1>wangle</h1>
-<p>This project started out as an exercise in using the <a href="http://nim-lang.org">nim</a> programming language and some of its libraries. It then morphed into an exercise in using GitHub Pages to document a project.</p>
-<p>wangle is a simple literate-programming tool in the style of <a href="http://www.cs.tufts.edu/~nr/noweb">noweb</a>, which generates the documentation using Markdown formatting.</p>
-<h1>Contents</h1>
-<ul>
-<li><a class="el" href="overview.html">Overview</a></li>
-<li><a class="el" href="structure.html">structure</a></li>
-<li><b>Scenarios</b><ul>
-<li><a class="el" href="initialisation.html">Initialisation</a></li>
-<li><a class="el" href="weave.html">weave</a></li>
-<li><a class="el" href="tangle.html">tangle</a></li>
-<li><a class="el" href="roots.html">roots</a> </li>
-</ul>
-</li>
-</ul>
-</div></div><!-- PageDoc -->
+</div><!-- top -->
+<div class="PageDoc"><div class="header">
+  <div class="headertitle">
+<div class="title">How to use GitHub Pages for documentation </div>  </div>
+</div><!--header-->
+<div class="contents">
+<div class="textblock"><p>Thanks to <a href="https://github.com/smartell/APIDemo">https://github.com/smartell/APIDemo</a> for showing the way.</p>
+<h2>1. Initial Setup</h2>
+<p>blah</p>
+<div class="fragment"><div class="line">git clone https://github.com/colinc904/wangle.git</div><div class="line">mkdir -p doc/html</div><div class="line">echo &#39;doc/html/&#39; &gt;&gt;.gitignore</div><div class="line">cd doc/html</div><div class="line">git clone https://github.com/colinc904/wangle.git</div><div class="line">git checkout origin/gh-pages -b gh-pages</div><div class="line">git branch -d master</div></div><!-- fragment --><h2>2. Committing Changes</h2>
+<p>blah</p>
+<div class="fragment"><div class="line">gc</div><div class="line">git push origin master</div><div class="line">cd doc/html</div><div class="line">ga .</div><div class="line">gc</div><div class="line">git push origin gh-pages</div></div><!-- fragment --><h2>3. Cloning the Repo</h2>
+<p>blah</p>
+<div class="fragment"><div class="line">git clone https://github.com/colinc904/wangle.git</div><div class="line">cd doc/html</div><div class="line">git clone https://github.com/colinc904/wangle.git</div><div class="line">git checkout gh-pages</div></div><!-- fragment --><h2>Dataflow</h2>
+<div class="dotgraph">
+<img src="dot_inline_dotgraph_1.png" alt="dot_inline_dotgraph_1.png" border="0" usemap="#dot_inline_dotgraph_1.map"/>
+</div>
+ </div></div><!-- PageDoc -->
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Feb 1 2019 09:03:51 for Wangle: a Tool for Literate Programming by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Fri Feb 1 2019 09:03:49 for Wangle: a Tool for Literate Programming by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.15
 </small></address>

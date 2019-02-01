@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.15"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Wangle: a Tool for Literate Programming: The implementation of wangle</title>
+<title>Wangle: a Tool for Literate Programming: Overview</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -62,16 +62,17 @@ $(function() {
 </div><!-- top -->
 <div class="PageDoc"><div class="header">
   <div class="headertitle">
-<div class="title">The implementation of wangle </div>  </div>
+<div class="title">Overview </div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><div class="fragment"><div class="line">&lt;&lt;LICENCE&gt;&gt;=</div><div class="line">This is free and unencumbered software released into the public domain.</div><div class="line"></div><div class="line">Anyone is free to copy, modify, publish, use, compile, sell, or</div><div class="line">distribute this software, either in source code form or as a compiled</div><div class="line">binary, for any purpose, commercial or non-commercial, and by any</div><div class="line">means.</div><div class="line"></div><div class="line">In jurisdictions that recognize copyright laws, the author or authors</div><div class="line">of this software dedicate any and all copyright interest in the</div><div class="line">software to the public domain. We make this dedication for the benefit</div><div class="line">of the public at large and to the detriment of our heirs and</div><div class="line">successors. We intend this dedication to be an overt act of</div><div class="line">relinquishment in perpetuity of all present and future rights to this</div><div class="line">software under copyright law.</div><div class="line"></div><div class="line">THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND,</div><div class="line">EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF</div><div class="line">MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.</div><div class="line">IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR</div><div class="line">OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,</div><div class="line">ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR</div><div class="line">OTHER DEALINGS IN THE SOFTWARE.</div><div class="line"></div><div class="line">For more information, please refer to &lt;http://unlicense.org&gt;</div></div><!-- fragment --><h2>Structure of a Literate Program</h2>
+<div class="textblock"><p>The technique of <a href="https://en.wikipedia.org/wiki/Literate_programming">Literate Programming</a> was first proposed by Prof. Donald Knuth way back in 1984. He described a literate program as a <em>web</em> of interconnected fragments from which one could <em>tangle</em> pieces together to make a compilable program, or <em>weave</em> them together to make the documentation.</p>
+<h2>Structure of a Literate Program</h2>
 <div class="fragment"><div class="line">&lt;&lt;patterns&gt;&gt;=</div><div class="line">DOC_HEADER*   = re&quot;^@$&quot;</div><div class="line">CODE_HEADER*  = re&quot;^&lt;&lt;([^&gt;]+)&gt;&gt;=$&quot;</div><div class="line">CODE_INCLUDE* = re&quot;^(.*)&lt;&lt;([^&gt;]+)&gt;&gt;(.*)$&quot;</div></div><!-- fragment --><h2>Command-Line Interface</h2>
 <div class="fragment"><div class="line">&lt;&lt;usage&gt;&gt;=</div><div class="line">const doc = &quot;&quot;&quot;</div><div class="line">wangle - a minimal Literate Programming tool in the style of noweb</div><div class="line"></div><div class="line">Usage:</div><div class="line">  wangle weave WEB [OUTPUT]</div><div class="line">  wangle tangle WEB CHUNK [OUTPUT]</div><div class="line">  wangle roots WEB</div><div class="line">  wangle [options]</div><div class="line"></div><div class="line">Options:</div><div class="line">  -h, --help    Show this message</div><div class="line">&quot;&quot;&quot;</div></div><!-- fragment --> </div></div><!-- PageDoc -->
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Jan 31 2019 09:31:43 for Wangle: a Tool for Literate Programming by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Fri Feb 1 2019 09:03:49 for Wangle: a Tool for Literate Programming by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.15
 </small></address>

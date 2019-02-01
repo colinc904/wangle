@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.15"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Wangle: a Tool for Literate Programming: Weave</title>
+<title>Wangle: a Tool for Literate Programming: weave</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -62,14 +62,14 @@ $(function() {
 </div><!-- top -->
 <div class="PageDoc"><div class="header">
   <div class="headertitle">
-<div class="title">Weave </div>  </div>
+<div class="title">weave </div>  </div>
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><div class="fragment"><div class="line">&lt;&lt;handle web-related commands&gt;&gt;=</div><div class="line">if args[&quot;weave&quot;]:</div><div class="line">  var filename: string</div><div class="line"></div><div class="line">  if args[&quot;OUTPUT&quot;]:</div><div class="line">    filename = $(args[&quot;OUTPUT&quot;])</div><div class="line">  else:</div><div class="line">    filename = changeFileExt(extractFilename($(args[&quot;WEB&quot;])), &quot;md&quot;)</div><div class="line"></div><div class="line">  let output = newFileStream(filename, fmWrite)</div><div class="line">  if isNil(output):</div><div class="line">    raise newException(IOError, &amp;&quot;failed to open {filename}&quot;)</div><div class="line">  the_web.weave(output)</div><div class="line">  close(output)</div></div><!-- fragment --><div class="fragment"><div class="line">&lt;&lt;web&gt;&gt;=</div><div class="line">proc weave*(self: Web, output: Stream) =</div><div class="line">  for chunk in self.doc:</div><div class="line">    chunk.weave(output)</div></div><!-- fragment --><div class="fragment"><div class="line">&lt;&lt;chunk&gt;&gt;=</div><div class="line">proc weave*(self: Chunk, output: Stream) =</div><div class="line">  if self.isCode:</div><div class="line">    output.writeLine(&quot;```\n&lt;&quot; &amp; &quot;&lt;&quot; &amp; self.name &amp; &quot;&gt;&gt;=&quot;)</div><div class="line">  for line in self.body:</div><div class="line">    output.writeLine(line)</div><div class="line">  if self.isCode:</div><div class="line">    output.writeLine(&quot;```&quot;)</div></div><!-- fragment --> </div></div><!-- PageDoc -->
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Jan 31 2019 09:31:43 for Wangle: a Tool for Literate Programming by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Fri Feb 1 2019 09:03:51 for Wangle: a Tool for Literate Programming by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.15
 </small></address>

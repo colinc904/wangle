@@ -1,4 +1,4 @@
-## Weave
+@page weave weave
 
 <<handle web-related commands>>=
 if args["weave"]:

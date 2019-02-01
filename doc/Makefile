@@ -2,17 +2,22 @@ all:
 	echo "Make what, exactly?"
 
 .PHONY: doc
-doc:
+doc: weave
 	doxygen Doxyfile
 
 .PHONY: clean
 clean:
-	-rm -rf html
+	-rm -f woven/*.md
+	-rm -f html/*.html
+	-rm -f html/*.js
+	-rm -f html/*.css
+	-rm -f html/*.png
+	-rm -f html/*.md5
+	-rm -rf html/search
 
-WEAVE = ../wangle weave
 .PHONY: weave
 weave:
 	for f in litprog/*.nw; \
 	do \
-		$(WEAVE) $$f woven/$$(basename $$f).md; \
+		$(WANGLE) weave $$f woven/$$(basename $$f).md; \
 	done

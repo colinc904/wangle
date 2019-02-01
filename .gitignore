@@ -1,4 +1,4 @@
 tmp.nw
 wangle
 doc/html/
-doc/woven/
+doc/woven/*.md

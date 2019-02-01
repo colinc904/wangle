@@ -17,31 +17,30 @@ help:
 
 export TOPDIR = $(PWD)
 export DOCDIR = $(TOPDIR)/doc
+export SRCDIR = $(TOPDIR)/src
+export WANGLE = wangle
 
 # --------------------------------------------------------------------
 #  User-facing rules
 # --------------------------------------------------------------------
 
-WEB = doc/wangle.nw
-WANGLE = ./wangle
-TANGLE = $(WANGLE) tangle
-ROOTS = $(WANGLE) roots
+NW = tmp.nw
 
 .PHONY: tangle
 tangle:
-	cat doc/litprog/*.nw >./tmp.nw
-	for f in $$($(ROOTS) tmp.nw); \
+	cat doc/litprog/*.nw >$(NW)
+	for f in $$($(WANGLE) roots $(NW)); \
 	do \
-		$(TANGLE) tmp.nw $$f src/$$f; \
+		$(WANGLE) tangle $(NW) $$f $(SRCDIR)/$$f; \
 	done
 
 .PHONY: build
-build:			## build the fsm program
+build: tangle		## build the fsm program
 	nimble build
 
 .PHONY: clean
 clean:			## remove generated files
-	-rm -f tmp.nw
+	-rm -f $(NW)
 	$(MAKE) -C doc clean
 #	$(MAKE) -C tests clean
 

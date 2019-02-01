@@ -1,4 +1,4 @@
-## Initialisation
+@page initialisation Initialisation
 
 <<cli>>=
 let args = docopt(doc)

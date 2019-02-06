@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.15"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>wangle: Data Structures</title>
+<title>wangle: README</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -75,14 +75,46 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div><!-- top -->
 <div class="PageDoc"><div class="header">
   <div class="headertitle">
-<div class="title">Data Structures </div>  </div>
+<div class="title">README </div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p>previous: <a class="el" href="cli.html">Command-Line Interface</a> | up: implenemtation | next: <a class="el" href="errors.html">Error Handling</a></p>
-<div class="plantumlgraph">
-<img src="inline_umlgraph_1.png" />
-</div>
- </div></div><!-- PageDoc -->
+<div class="textblock"><p>A [literate program]() is a single file containing both source code and documentation for some software.</p>
+<p><code>wangle</code> is a utility program to extract just the documentation or just the source code as required.</p>
+<h1>Status</h1>
+<p>This project started simply as an exercise in programming with the <a href="http://nim-lang.org">nim</a> language. It has since grown into an exercise in using <a href="https://pages.github.com/">GitHub Pages</a> to document a project.</p>
+<p>It works well enough to produce its own code and docs.</p>
+<h1>How to Install</h1>
+<p>Wangle is written as a <a href="https://github.com/nim-lang/nimble">nimble</a> package, so if you have installed that, just type</p>
+<p><code>nimble install <a href="https://github.com/colinc904/wangle">https://github.com/colinc904/wangle</a></code></p>
+<p>otherwise you can enter the <code>./src</code> directory and type</p>
+<p><code>nim compile wangle</code></p>
+<h1>How to Use</h1>
+<p>For now, just take a peek in <code>./Makefile</code> and <code>./doc/Makefile</code>. You can type <code>wangle --help</code> for a quick reminder of the command syntax.</p>
+<h1>How to Develop</h1>
+<p>DO NOT EDIT the files in the <code>./src</code> subtree! They are all automatically generated from <code>./wangle.nw</code>.</p>
+<h1>Contents</h1>
+<ul>
+<li><a class="el" href="overview.html">overview</a></li>
+<li><b>Implementation</b><ul>
+<li><a class="el" href="cli.html">Command-Line Interface</a></li>
+<li><a class="el" href="structure.html">Data Structures</a></li>
+<li><a class="el" href="errors.html">Error Handling</a></li>
+</ul>
+</li>
+<li><b>Control Flows</b><ul>
+<li><a class="el" href="initialisation.html">Initialisation</a></li>
+<li><a class="el" href="roots.html">roots</a></li>
+<li><a class="el" href="weave.html">weave</a></li>
+<li><a class="el" href="tangle.html">tangle</a></li>
+</ul>
+</li>
+<li><b>Appendix</b><ul>
+<li><a class="el" href="licence.html">Licence</a></li>
+<li><a class="el" href="files.html">File Structure</a> </li>
+</ul>
+</li>
+</ul>
+</div></div><!-- PageDoc -->
 </div><!-- contents -->
 <!-- HTML footer for doxygen 1.8.15-->
 <!-- start footer part -->

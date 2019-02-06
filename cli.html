@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.15"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>wangle: Data Structures</title>
+<title>wangle: Command-Line Interface</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -75,14 +75,12 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div><!-- top -->
 <div class="PageDoc"><div class="header">
   <div class="headertitle">
-<div class="title">Data Structures </div>  </div>
+<div class="title">Command-Line Interface </div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p>previous: <a class="el" href="cli.html">Command-Line Interface</a> | up: implenemtation | next: <a class="el" href="errors.html">Error Handling</a></p>
-<div class="plantumlgraph">
-<img src="inline_umlgraph_1.png" />
-</div>
- </div></div><!-- PageDoc -->
+<div class="textblock"><p>up: <a class="el" href="implementation.html">Implementation</a> | next: <a class="el" href="structure.html">Data Structures</a></p>
+<p><a href="https://github.com/docopt/docopt.nim">nim version</a></p>
+<div class="fragment"><div class="line">&lt;&lt;usage&gt;&gt;=</div><div class="line">const docstring = &quot;&quot;&quot;</div><div class="line">wangle - a minimal Literate Programming tool in the style of noweb</div><div class="line"></div><div class="line">Usage:</div><div class="line">  wangle weave WEB [OUTPUT]</div><div class="line">  wangle tangle WEB CHUNK [OUTPUT]</div><div class="line">  wangle roots WEB</div><div class="line">  wangle [options]</div><div class="line"></div><div class="line">Options:</div><div class="line">  -h, --help    Show this message</div><div class="line">&quot;&quot;&quot;</div></div><!-- fragment --><div class="fragment"><div class="line">&lt;&lt;cli&gt;&gt;=</div><div class="line"></div><div class="line">&lt;&lt;usage&gt;&gt;</div><div class="line"></div><div class="line">try:</div><div class="line">  var theWeb: Web</div><div class="line">  let args = docopt(docstring)</div><div class="line">  &lt;&lt;build the web&gt;&gt;</div><div class="line">  &lt;&lt;handle commands&gt;&gt;</div><div class="line">  quit(QuitSuccess)</div><div class="line"></div><div class="line">except WangleError:</div><div class="line">  stderr.write(getCurrentExceptionMsg())</div><div class="line">  quit(QuitFailure)</div></div><!-- fragment --><div class="fragment"><div class="line">&lt;&lt;patterns&gt;&gt;=</div><div class="line">let</div><div class="line">  CODE_HEADER*  = re&quot;^&lt;&lt;(?&lt;name&gt;[^&gt;]*)&gt;&gt;=$&quot;</div><div class="line">  CODE_INCLUDE* = re&quot;^(?&lt;prefix&gt;.*)&lt;&lt;(?&lt;name&gt;[^&gt;]*)&gt;&gt;(?&lt;suffix&gt;.*)$&quot;</div><div class="line">  CODE_TRAILER* = re&quot;^@$&quot;</div></div><!-- fragment --> </div></div><!-- PageDoc -->
 </div><!-- contents -->
 <!-- HTML footer for doxygen 1.8.15-->
 <!-- start footer part -->

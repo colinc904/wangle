@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.15"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>wangle: Data Structures</title>
+<title>wangle: File Structure</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -75,14 +75,14 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div><!-- top -->
 <div class="PageDoc"><div class="header">
   <div class="headertitle">
-<div class="title">Data Structures </div>  </div>
+<div class="title">File Structure </div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p>previous: <a class="el" href="cli.html">Command-Line Interface</a> | up: implenemtation | next: <a class="el" href="errors.html">Error Handling</a></p>
-<div class="plantumlgraph">
-<img src="inline_umlgraph_1.png" />
+<div class="textblock"><p>previous: <a class="el" href="licence.html">Licence</a> | up: <a class="el" href="appendix.html">Appendix</a></p>
+<div class="dotgraph">
+<img src="dot_inline_dotgraph_2.png" alt="dot_inline_dotgraph_2.png" border="0" usemap="#dot_inline_dotgraph_2.map"/>
 </div>
- </div></div><!-- PageDoc -->
+<div class="fragment"><div class="line">&lt;&lt;wangle.nim&gt;&gt;=</div><div class="line"># &lt;&lt;LICENCE&gt;&gt;</div><div class="line">import ospaths</div><div class="line">import streams</div><div class="line">import strformat</div><div class="line">import docopt</div><div class="line">import wanglepkg/web</div><div class="line"></div><div class="line">&lt;&lt;cli&gt;&gt;</div></div><!-- fragment --><div class="fragment"><div class="line">&lt;&lt;wanglepkg/patterns.nim&gt;&gt;=</div><div class="line"># &lt;&lt;LICENCE&gt;&gt;</div><div class="line">import nre except toSeq</div><div class="line">export nre</div><div class="line"></div><div class="line">&lt;&lt;patterns&gt;&gt;</div></div><!-- fragment --><div class="fragment"><div class="line">&lt;&lt;wanglepkg/chunk.nim&gt;&gt;=</div><div class="line"># &lt;&lt;LICENCE&gt;&gt;</div><div class="line"># import nre</div><div class="line">import streams</div><div class="line"></div><div class="line">import patterns</div><div class="line"></div><div class="line">&lt;&lt;common types&gt;&gt;</div><div class="line">&lt;&lt;chunk type&gt;&gt;</div><div class="line"></div><div class="line">&lt;&lt;chunk procs&gt;&gt;</div></div><!-- fragment --><div class="fragment"><div class="line">&lt;&lt;wanglepkg/clump.nim&gt;&gt;=</div><div class="line"># &lt;&lt;LICENCE&gt;&gt;</div><div class="line">import sets</div><div class="line">import chunk</div><div class="line"></div><div class="line">&lt;&lt;clump type&gt;&gt;</div><div class="line"></div><div class="line">&lt;&lt;clump procs&gt;&gt;</div></div><!-- fragment --><div class="fragment"><div class="line">&lt;&lt;wanglepkg/web.nim&gt;&gt;=</div><div class="line"># &lt;&lt;LICENCE&gt;&gt;</div><div class="line"># import nre</div><div class="line">import sets</div><div class="line">import streams</div><div class="line">import strformat</div><div class="line">import strutils</div><div class="line">import tables</div><div class="line"></div><div class="line">import clump</div><div class="line">import chunk</div><div class="line">import patterns</div><div class="line">&lt;&lt;exception type&gt;&gt;</div><div class="line">&lt;&lt;context type&gt;&gt;</div><div class="line">&lt;&lt;context procs&gt;&gt;</div><div class="line">&lt;&lt;web type&gt;&gt;</div><div class="line"></div><div class="line">&lt;&lt;web forward declarations&gt;&gt;</div><div class="line"></div><div class="line">&lt;&lt;web procs&gt;&gt;</div></div><!-- fragment --> </div></div><!-- PageDoc -->
 </div><!-- contents -->
 <!-- HTML footer for doxygen 1.8.15-->
 <!-- start footer part -->

@@ -22,10 +22,10 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 # 
 # For more information, please refer to <http://unlicense.org>
-
-import nre
+import nre except toSeq
+export nre
 
 let
-  DOC_HEADER*   = re"^@$"
-  CODE_HEADER*  = re"^<<([^>]+)>>=$"
-  CODE_INCLUDE* = re"^(.*)<<([^>]+)>>(.*)$"
+  CODE_HEADER*  = re"^<<(?<name>[^>]*)>>=$"
+  CODE_INCLUDE* = re"^(?<prefix>.*)<<(?<name>[^>]*)>>(?<suffix>.*)$"
+  CODE_TRAILER* = re"^@$"

@@ -22,16 +22,14 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 # 
 # For more information, please refer to <http://unlicense.org>
-
 import ospaths
 import streams
 import strformat
 import docopt
-
-import wanglepkg/chunk
 import wanglepkg/web
 
-const doc = """
+
+const docstring = """
 wangle - a minimal Literate Programming tool in the style of noweb
 
 Usage:
@@ -44,22 +42,36 @@ Options:
   -h, --help    Show this message
 """
 
-let args = docopt(doc)
 
-if args["WEB"]:
-  let filename = $(args["WEB"])
-  let input = newFileStream(filename)
-  if isNil(input):
-    raise newException(IOError, &"failed to open {filename}")
-  let theWeb = newWeb()
-  theWeb.read(input)
-  theWeb.digest()
-  close(input)
+try:
+  var theWeb: Web
+  let args = docopt(docstring)
+  if args["WEB"]:
+    let filename = $(args["WEB"])
+    let input = newFileStream(filename)
+    if input.isNil:
+      raise newException(WangleError, &"failed to open {filename}")
+    theWeb = newWebFrom(input)
+    close(input)
   
   if args["roots"]:
     for name in theWeb.roots:
       stdout.writeLine(name)
   
+  if args["weave"]:
+    var filename: string
+  
+    if args["OUTPUT"]:
+      filename = $(args["OUTPUT"])
+    else:
+      filename = changeFileExt(ospaths.extractFilename($(args["WEB"])), "md")
+  
+    let output = newFileStream(filename, fmWrite)
+    if isNil(output):
+      raise newException(WangleError, &"failed to open {filename}")
+    the_web.weave(output)
+    close(output)
+    
   if args["tangle"]:
     var filename: string
   
@@ -70,22 +82,12 @@ if args["WEB"]:
   
     let output = newFileStream(filename, fmWrite)
     if isNil(output):
-      raise newException(IOError, &"failed to open {filename}")
+      raise newException(WangleError, &"failed to open {filename}")
     the_web.tangle($args["CHUNK"], output)
     close(output)
     
-  if args["weave"]:
-    var filename: string
-  
-    if args["OUTPUT"]:
-      filename = $(args["OUTPUT"])
-    else:
-      filename = changeFileExt(extractFilename($(args["WEB"])), "md")
-  
-    let output = newFileStream(filename, fmWrite)
-    if isNil(output):
-      raise newException(IOError, &"failed to open {filename}")
-    the_web.weave(output)
-    close(output)
-    
+  quit(QuitSuccess)
 
+except WangleError:
+  stderr.write(getCurrentExceptionMsg())
+  quit(QuitFailure)

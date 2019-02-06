@@ -5,7 +5,7 @@
 #----------------------------------------------------------------------
 
 DOXYFILE_ENCODING      = UTF-8
-PROJECT_NAME           = "Wangle: a Tool for Literate Programming"
+PROJECT_NAME           = "wangle"
 PROJECT_NUMBER         = 
 PROJECT_BRIEF          = 
 PROJECT_LOGO           = 
@@ -155,8 +155,8 @@ IGNORE_PREFIX          =
 GENERATE_HTML          = YES
 HTML_OUTPUT            = html
 HTML_FILE_EXTENSION    = .html
-HTML_HEADER            = 
-HTML_FOOTER            = 
+HTML_HEADER            = header.html
+HTML_FOOTER            = footer.html
 HTML_STYLESHEET        = 
 HTML_EXTRA_STYLESHEET  = 
 HTML_EXTRA_FILES       = 
@@ -188,7 +188,7 @@ QHP_SECT_FILTER_ATTRS  =
 QHG_LOCATION           = 
 GENERATE_ECLIPSEHELP   = NO
 ECLIPSE_DOC_ID         = org.doxygen.Project
-DISABLE_INDEX          = NO
+DISABLE_INDEX          = YES
 GENERATE_TREEVIEW      = NO
 ENUM_VALUES_PER_LINE   = 4
 TREEVIEW_WIDTH         = 250

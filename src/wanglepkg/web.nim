@@ -22,113 +22,183 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 # 
 # For more information, please refer to <http://unlicense.org>
-
-import nre
+# import nre
+import sets
 import streams
 import strformat
+import strutils
 import tables
 
-import chunk
 import clump
-import tangleresult
+import chunk
 import patterns
+type WangleError* = object of Exception
+type ContextKind = enum
+  toplevel
+  nested
 
-type Web* = ref object
-  doc: seq[Chunk]
-  code: TableRef[string, Clump]
+type Context* = ref object
+  case kind*: ContextKind
+  of toplevel:
+    givenName: string
+  of nested:
+    line*: int
+    match*: RegexMatch
+    context*:    Context
 
-type Context = ref object
-  name: string
-  line: int
-  indent: string
-  context: Context
+proc toplevelContext(name: string): Context =
+  new(result)
+  result.kind = toplevel
+  result.givenName = name
 
-proc newContext(
-  name: string,
+proc nestedContext(
   line: int,
-  indent: string = "",
-  context: Context = nil
+  match: RegexMatch,
+  context: Context
 ): Context =
   new(result)
-  result.name = name
+  result.kind = nested
   result.line = line
-  result.indent = indent
+  result.match = match
   result.context = context
 
+proc prefix*(self: Context): string =
+  case self.kind
+  of toplevel:
+    result = ""
+  of nested:
+    result = self.match.captures["prefix"]
+
+proc name*(self: Context): string =
+  case self.kind
+  of toplevel:
+    result = self.givenName
+  of nested:
+    result = self.match.captures["name"]
+
+proc suffix*(self: Context): string =
+  case self.kind
+  of toplevel:
+    result = ""
+  of nested:
+    result = self.match.captures["suffix"]
+
 proc contains*(self: Context, name: string): bool =
-  if self.name == name:
-    return true
-  elif self.context.isNil:
-    return false
+  if name == self.name:
+    result = true
+  elif self.kind == toplevel:
+    result = false
   else:
-    return self.context.contains(name)
+    result = self.context.contains(name)
+
+proc info*(self: Context): string =
+  result = &"included in <{self.context.name}> at line {self.line}"
+
+iterator traceback*(self: Context): string =
+  yield self.info
+  var context = self.context
+  while context.kind == nested:
+    yield context.info
+    context = context.context
+
+type Web* = ref object
+  doc:  seq[Chunk]
+  code*: Table[string, Clump]
+
+proc newWeb*(): Web
+proc read*(self: Web, input: Stream)
+proc gatherClumps(self: Web)
+proc tangleClump(self: Web, context: Context, output: Stream)
+
+
+proc `[]`*(self: Web, name: string): Clump =
+  if name notin self.code:
+    self.code[name] = newClump()
+  result = self.code[name]
+
+proc contains*(self: Web, name: string): bool =
+  result = self.code.contains(name)
+
+proc newWebFrom*(input: Stream): Web =
+  result = newWeb()
+  result.read(input)
+  result.gatherClumps()
 
 proc newWeb*(): Web =
   new(result)
-  result.doc = @[]
-  result.code = newTable[string, Clump]();
+  result.doc = newSeq[Chunk]()
+  result.code = initTable[string, Clump]()
 
 proc read*(self: Web, input: Stream) =
   var line = 1
   var current = newChunk(line)
   self.doc.add(current)
+
   while not atEnd(input):
     let text = input.readLine()
-    let docChunk = text.match(DOC_HEADER)
+    let docChunk = text.match(CODE_TRAILER)
     let codeChunk = text.match(CODE_HEADER)
+
     if isSome(docChunk):
       current = newChunk(line)
       self.doc.add(current)
+
     elif isSome(codeChunk):
-      current = newChunk(line + 1, get(codeChunk).captures[0])
+      current = newChunk(line + 1, get(codeChunk).captures["name"])
       self.doc.add(current)
+
     else:
       current.add(text)
+
     line += 1
 
-proc digest*(self: Web) =
+proc gatherClumps(self: Web) =
   for chunk in self.doc:
     if chunk.isCode:
-      if chunk.name notin self.code:
-        self.code[chunk.name] = newClump()
-      self.code[chunk.name].add(chunk)
-  for includer, clump in self.code:
-    for includee in clump.inclusions:
-      if includee in self.code:
-        self.code[includee].includedBy(includer)
+      self[chunk.name].add(chunk)
 
 iterator roots*(self: Web): string =
+  for includer, clump in self.code:
+    for line, includee in clump.inclusions:
+      self.code[includee].included += 1
   for name, clump in self.code:
-    if self.code[name].isRoot:
+    if clump.included == 0:
       yield name
-  
-proc tangleClump(
-  self: Web,
-  name: string,
-  context: Context,
-  output: Stream
-) =
-  for item in self.code[name].tangle():
-    case item.kind
-    of simple:
-      output.writeLine(context.indent & item.text)
-    of inclusion:
-      if item.name in context:
-        raise newException(Exception, &"recursive incluing {item.name}")
-      let nestedContext = newContext(
-        item.name,
-        item.line,
-        context.indent & item.indent,
-        context
-      )
-      self.tangleClump(item.name, nestedContext, output)
-
-
-proc tangle*(self: Web, name: string, output: Stream) =
-  let rootContext = newContext(name, 0, "")
-  self.tangleClump(name, rootContext, output)
 
 proc weave*(self: Web, output: Stream) =
   for chunk in self.doc:
     chunk.weave(output)
+
+proc tangle*(self: Web, name: string, output: Stream) =
+  let context = toplevelContext(name)
+
+  self.tangleClump(context, output)
+
+proc tangleClump(
+  self:    Web,
+  context: Context,
+  output:  Stream
+) =
+  if context.name notin self:
+    raise newException(WangleError, &"<{context.name}> not found")
+
+  for line, text in self[context.name]:
+    let codeInclude = text.match(CODE_INCLUDE)
+
+    if isSome(codeInclude):
+      let includee = get(codeInclude).captures["name"]
+      if includee in context:
+        var message = @[&"recursive inclusion of <{includee}>"]
+        message.add(&"included in <{context.name}> at line {line}")
+        for text in context.traceback:
+          message.add(text)
+        raise newException(WangleError, strutils.join(message, "\n"))
+      else:
+        self.tangleClump(
+          nestedContext(line, get(codeInclude), context),
+          output
+        )
+
+    else:
+      output.writeLine(context.prefix & text & context.suffix)
 

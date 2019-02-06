@@ -1,0 +1,694 @@
+@page overview overview
+
+up: @ref readme | next: @ref implementation
+
+@section terminology Terminology
+
+wangle is a simple literate-programming tool in the style of
+[noweb](http://www.cs.tufts.edu/~nr/noweb), which generates the
+documentation using Markdown formatting.
+web, weave, tangle
+(ref Wikipedia)
+(ref noweb)
+
+
+
+@page implementation Implementation
+
+previous: @ref overview | up: @ref readme | next: @ref control
+
+Contents
+
+- @ref cli
+- @ref structure
+- @ref errors
+
+@page cli Command-Line Interface
+
+up: @ref implementation | next: @ref structure
+
+[nim version](https://github.com/docopt/docopt.nim)
+
+<<usage>>=
+const docstring = """
+wangle - a minimal Literate Programming tool in the style of noweb
+
+Usage:
+  wangle weave WEB [OUTPUT]
+  wangle tangle WEB CHUNK [OUTPUT]
+  wangle roots WEB
+  wangle [options]
+
+Options:
+  -h, --help    Show this message
+"""
+
+@
+
+<<cli>>=
+
+<<usage>>
+
+try:
+  var theWeb: Web
+  let args = docopt(docstring)
+  <<build the web>>
+  <<handle commands>>
+  quit(QuitSuccess)
+
+except WangleError:
+  stderr.write(getCurrentExceptionMsg())
+  quit(QuitFailure)
+@
+
+<<patterns>>=
+let
+  CODE_HEADER*  = re"^<<(?<name>[^>]*)>>=$"
+  CODE_INCLUDE* = re"^(?<prefix>.*)<<(?<name>[^>]*)>>(?<suffix>.*)$"
+  CODE_TRAILER* = re"^@$"
+@
+
+@page structure Data Structures
+
+previous: @ref cli | up: @ref implenemtation | next: @ref errors
+
+@startuml
+
+class Chunk {
+  -line
+  name
+  -body
+  newChunk()
+  add(text)
+  isCode()
+  pairs()
+  inclusions()
+  weave()
+
+}
+
+class Clump {
+  chunks
+  included
+  newClump()
+  add(Chunk)
+  pairs()
+  inclusions()
+}
+
+class Web {
+  doc
+  code
+  newWebFrom()
+  roots()
+  weave(output)
+  tangle(name, output)
+}
+
+Clump o- Chunk
+Web *-- Clump
+Web *-- Chunk
+
+@enduml
+
+@page errors Error Handling
+
+previous: @ref structure | up: @ref implementation | next: @ref control
+
+<<exception type>>=
+type WangleError* = object of Exception
+@
+
+@page control Control Flows
+
+previous: @ref implementation | up: @ref readme | next: @ref appendix
+
+Contents:
+- @ref initialisation
+- @ref roots
+- @ref weave
+- @ref tangle
+
+<<common types>>=
+type NumberedText* = tuple[line: int, text: string]
+@
+
+<<chunk type>>=
+type Chunk* = ref object
+  line:  int
+  name*: string
+  body:  seq[string]
+@
+
+<<chunk procs>>=
+proc newChunk*(line: int, name: string = ""): Chunk =
+  new(result)
+  result.line = line
+  result.name = name
+  result.body = newSeq[string]()
+
+@
+
+<<chunk procs>>=
+proc isCode*(self: Chunk): bool =
+  result = (len(self.name) > 0)
+
+@
+
+<<chunk procs>>=
+proc add*(self: Chunk, text: string) =
+  self.body.add(text)
+
+@
+
+<<chunk procs>>=
+iterator pairs*(self: Chunk): NumberedText =
+  var line = self.line
+  for text in self.body:
+    yield (line, text)
+    line += 1
+
+@
+
+<<clump type>>=
+type Clump* = ref object
+  chunks:     seq[Chunk]
+  included*:  int
+@
+
+<<clump procs>>=
+proc newClump*(): Clump =
+  new(result)
+  result.chunks = newSeq[Chunk]()
+  result.included = 0
+
+@
+
+<<clump procs>>=
+proc add*(self: Clump, chunk: Chunk) =
+  self.chunks.add(chunk)
+
+@
+
+<<clump procs>>=
+iterator pairs*(self: Clump): NumberedText =
+  for chunk in self.chunks:
+    for line, text in chunk:
+      yield (line, text)
+
+@
+
+<<context type>>=
+type ContextKind = enum
+  toplevel
+  nested
+
+@
+
+<<context type>>=
+type Context* = ref object
+  case kind*: ContextKind
+  of toplevel:
+    givenName: string
+  of nested:
+    line*: int
+    match*: RegexMatch
+    context*:    Context
+
+@
+
+<<web type>>=
+type Web* = ref object
+  doc:  seq[Chunk]
+  code*: Table[string, Clump]
+@
+
+<<web procs>>=
+proc `[]`*(self: Web, name: string): Clump =
+  if name notin self.code:
+    self.code[name] = newClump()
+  result = self.code[name]
+
+@
+
+<<web procs>>=
+proc contains*(self: Web, name: string): bool =
+  result = self.code.contains(name)
+
+@
+
+
+@page initialisation Initialisation
+
+previous: @ref errors | up: @ref control | next: @ref roots
+
+<<build the web>>=
+if args["WEB"]:
+  let filename = $(args["WEB"])
+  let input = newFileStream(filename)
+  if input.isNil:
+    raise newException(WangleError, &"failed to open {filename}")
+  theWeb = newWebFrom(input)
+  close(input)
+
+@
+
+<<web procs>>=
+proc newWebFrom*(input: Stream): Web =
+  result = newWeb()
+  result.read(input)
+  result.gatherClumps()
+
+@
+
+<<web forward declarations>>=
+proc newWeb*(): Web
+@
+ 
+<<web procs>>=
+proc newWeb*(): Web =
+  new(result)
+  result.doc = newSeq[Chunk]()
+  result.code = initTable[string, Clump]()
+
+@
+
+<<web forward declarations>>=
+proc read*(self: Web, input: Stream)
+@
+
+<<web procs>>=
+proc read*(self: Web, input: Stream) =
+  var line = 1
+  var current = newChunk(line)
+  self.doc.add(current)
+
+  while not atEnd(input):
+    let text = input.readLine()
+    let docChunk = text.match(CODE_TRAILER)
+    let codeChunk = text.match(CODE_HEADER)
+
+    if isSome(docChunk):
+      current = newChunk(line)
+      self.doc.add(current)
+
+    elif isSome(codeChunk):
+      current = newChunk(line + 1, get(codeChunk).captures["name"])
+      self.doc.add(current)
+
+    else:
+      current.add(text)
+
+    line += 1
+
+@
+
+<<web forward declarations>>=
+proc gatherClumps(self: Web)
+@
+
+<<web procs>>=
+proc gatherClumps(self: Web) =
+  for chunk in self.doc:
+    if chunk.isCode:
+      self[chunk.name].add(chunk)
+
+@
+
+@page roots roots
+
+previous: @ref initialisation | up: @ref control | next: @ref weave
+
+<<handle commands>>=
+if args["roots"]:
+  for name in theWeb.roots:
+    stdout.writeLine(name)
+
+@
+
+<<web procs>>=
+iterator roots*(self: Web): string =
+  for includer, clump in self.code:
+    for line, includee in clump.inclusions:
+      self.code[includee].included += 1
+  for name, clump in self.code:
+    if clump.included == 0:
+      yield name
+
+@
+
+<<clump procs>>=
+iterator inclusions*(self: Clump): NumberedText =
+  for chunk in self.chunks:
+    for line, inclusion in chunk.inclusions:
+      yield (line, inclusion)
+
+@
+
+<<chunk procs>>=
+iterator inclusions*(self: Chunk): NumberedText =
+  var line = self.line
+  for text in self.body:
+    let codeInclude = text.match(CODE_INCLUDE)
+    if isSome(codeInclude):
+      yield (line, get(codeInclude).captures["name"])
+    line += 1
+
+@
+
+@page weave weave
+
+previous: @ref roots | up: @ref control | next: @ref tangle
+
+<<handle commands>>=
+if args["weave"]:
+  var filename: string
+
+  if args["OUTPUT"]:
+    filename = $(args["OUTPUT"])
+  else:
+    filename = changeFileExt(ospaths.extractFilename($(args["WEB"])), "md")
+
+  let output = newFileStream(filename, fmWrite)
+  if isNil(output):
+    raise newException(WangleError, &"failed to open {filename}")
+  the_web.weave(output)
+  close(output)
+  
+@
+
+<<web procs>>=
+proc weave*(self: Web, output: Stream) =
+  for chunk in self.doc:
+    chunk.weave(output)
+
+@
+
+<<chunk procs>>=
+proc weave*(self: Chunk, output: Stream) =
+  if self.isCode:
+    output.writeline("```")
+    output.writeLine("<<" & self.name & ">" & ">=")
+    for text in self.body:
+      output.writeLine(text)
+    output.writeLine("```")
+  else:
+    for text in self.body:
+      output.writeLine(text)
+
+@
+
+@page tangle tangle
+
+previous: @ref weave | up: @ref readme | next: @ref appendix
+
+<<handle commands>>=
+if args["tangle"]:
+  var filename: string
+
+  if args["OUTPUT"]:
+    filename = $(args["OUTPUT"])
+  else:
+    filename = $(args["CHUNK"])
+
+  let output = newFileStream(filename, fmWrite)
+  if isNil(output):
+    raise newException(WangleError, &"failed to open {filename}")
+  the_web.tangle($args["CHUNK"], output)
+  close(output)
+  
+@
+
+<<web procs>>=
+proc tangle*(self: Web, name: string, output: Stream) =
+  let context = toplevelContext(name)
+
+  self.tangleClump(context, output)
+
+@
+
+<<web forward declarations>>=
+proc tangleClump(self: Web, context: Context, output: Stream)
+
+@
+
+<<web procs>>=
+proc tangleClump(
+  self:    Web,
+  context: Context,
+  output:  Stream
+) =
+  if context.name notin self:
+    raise newException(WangleError, &"<{context.name}> not found")
+
+  for line, text in self[context.name]:
+    let codeInclude = text.match(CODE_INCLUDE)
+
+    if isSome(codeInclude):
+      let includee = get(codeInclude).captures["name"]
+      if includee in context:
+        var message = @[&"recursive inclusion of <{includee}>"]
+        message.add(&"included in <{context.name}> at line {line}")
+        for text in context.traceback:
+          message.add(text)
+        raise newException(WangleError, strutils.join(message, "\n"))
+      else:
+        self.tangleClump(
+          nestedContext(line, get(codeInclude), context),
+          output
+        )
+
+    else:
+      output.writeLine(context.prefix & text & context.suffix)
+
+@
+
+<<context procs>>=
+proc toplevelContext(name: string): Context =
+  new(result)
+  result.kind = toplevel
+  result.givenName = name
+
+@
+
+<<context procs>>=
+proc nestedContext(
+  line: int,
+  match: RegexMatch,
+  context: Context
+): Context =
+  new(result)
+  result.kind = nested
+  result.line = line
+  result.match = match
+  result.context = context
+
+@
+
+<<context procs>>=
+proc prefix*(self: Context): string =
+  case self.kind
+  of toplevel:
+    result = ""
+  of nested:
+    result = self.match.captures["prefix"]
+
+@
+
+<<context procs>>=
+proc name*(self: Context): string =
+  case self.kind
+  of toplevel:
+    result = self.givenName
+  of nested:
+    result = self.match.captures["name"]
+
+@
+
+<<context procs>>=
+proc suffix*(self: Context): string =
+  case self.kind
+  of toplevel:
+    result = ""
+  of nested:
+    result = self.match.captures["suffix"]
+
+@
+
+<<context procs>>=
+proc contains*(self: Context, name: string): bool =
+  if name == self.name:
+    result = true
+  elif self.kind == toplevel:
+    result = false
+  else:
+    result = self.context.contains(name)
+
+@
+
+<<context procs>>=
+proc info*(self: Context): string =
+  result = &"included in <{self.context.name}> at line {self.line}"
+
+@
+
+<<context procs>>=
+iterator traceback*(self: Context): string =
+  yield self.info
+  var context = self.context
+  while context.kind == nested:
+    yield context.info
+    context = context.context
+
+@
+
+@page appendix Appendix
+
+previous: @ref control | up: @ref readme
+
+contents
+
+- @ref licence
+- @ref files
+
+@page licence Licence
+
+previous: @ref tangle | up: @ref appendix | next: @ref files
+
+<<LICENCE>>=
+This is free and unencumbered software released into the public domain.
+
+Anyone is free to copy, modify, publish, use, compile, sell, or
+distribute this software, either in source code form or as a compiled
+binary, for any purpose, commercial or non-commercial, and by any
+means.
+
+In jurisdictions that recognize copyright laws, the author or authors
+of this software dedicate any and all copyright interest in the
+software to the public domain. We make this dedication for the benefit
+of the public at large and to the detriment of our heirs and
+successors. We intend this dedication to be an overt act of
+relinquishment in perpetuity of all present and future rights to this
+software under copyright law.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+OTHER DEALINGS IN THE SOFTWARE.
+
+For more information, please refer to <http://unlicense.org>
+@
+
+@page files File Structure
+
+previous: @ref licence | up: @ref appendix 
+
+@dot
+
+digraph imports {
+  rankdir=LR
+  node[fontname=Helvetica,fontsize=10]
+  chunk[label="chunk.nim"]
+  clump[label="clump.nim"]
+  web[label="web.nim"]
+  cli[label="wangle.nim"]
+  patterns[label="patterns.nim"]
+
+  subgraph std {
+    rank=same
+    node[shape=box,width=1.0,height=0.3]
+    docopt
+    nre
+    ospaths
+    streams
+    strformat
+    strutils
+    tables
+  }
+
+  chunk -> streams
+  chunk -> patterns
+  cli -> ospaths
+  cli -> streams
+  cli -> strformat
+  cli -> docopt
+  cli -> web
+  clump -> chunk
+  patterns -> nre
+  web -> streams
+  web -> strformat
+  web -> strutils
+  web -> tables
+  web -> clump
+  web -> chunk
+  web -> patterns
+}
+@enddot
+
+<<wangle.nim>>=
+# <<LICENCE>>
+import ospaths
+import streams
+import strformat
+import docopt
+import wanglepkg/web
+
+<<cli>>
+@
+
+<<wanglepkg/patterns.nim>>=
+# <<LICENCE>>
+import nre except toSeq
+export nre
+
+<<patterns>>
+@
+
+
+<<wanglepkg/chunk.nim>>=
+# <<LICENCE>>
+# import nre
+import streams
+
+import patterns
+
+<<common types>>
+<<chunk type>>
+
+<<chunk procs>>
+@
+
+<<wanglepkg/clump.nim>>=
+# <<LICENCE>>
+import sets
+import chunk
+
+<<clump type>>
+
+<<clump procs>>
+@
+
+<<wanglepkg/web.nim>>=
+# <<LICENCE>>
+# import nre
+import sets
+import streams
+import strformat
+import strutils
+import tables
+
+import clump
+import chunk
+import patterns
+<<exception type>>
+<<context type>>
+<<context procs>>
+<<web type>>
+
+<<web forward declarations>>
+
+<<web procs>>
+@

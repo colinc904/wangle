@@ -16,8 +16,7 @@ clean:
 	-rm -rf html/search
 
 .PHONY: weave
+NW = $(TOPDIR)/wangle.nw
+
 weave:
-	for f in litprog/*.nw; \
-	do \
-		$(WANGLE) weave $$f woven/$$(basename $$f).md; \
-	done
+	$(WANGLE) weave $(NW) woven/$$(basename $(NW) .nw).md;

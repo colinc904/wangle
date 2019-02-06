@@ -1,4 +1,5 @@
 @mainpage notitle
+@anchor readme
 
 @internal
 
@@ -15,26 +16,58 @@ If you have cloned the repo, you can generate it locally as follows:
 
 @endinternal
 
+A [literate program]()
+is a single file containing both source code and
+documentation for some software.
 
-# wangle
+`wangle` is a utility program to extract just the documentation or
+just the source code as required.
 
-This project started out as an exercise in using the
-[nim](http://nim-lang.org) programming language and some of its
-libraries. It then morphed into an exercise in
-using GitHub Pages to document a project.
+# Status
 
-wangle is a simple literate-programming tool in the style of
-[noweb](http://www.cs.tufts.edu/~nr/noweb), which generates the
-documentation using Markdown formatting.
+This project started simply as an exercise in programming with the
+[nim](http://nim-lang.org)
+language. It has since grown into an exercise in using 
+[GitHub Pages](https://pages.github.com/)
+to document a project.
 
+It works well enough to produce its own code and docs.
+
+# How to Install
+
+Wangle is written as a
+[nimble](https://github.com/nim-lang/nimble)
+package, so if you have installed that, just type
+
+`nimble install https://github.com/colinc904/wangle`
+
+otherwise you can enter the `./src` directory and type
+
+`nim compile wangle`
+
+# How to Use
+
+For now, just take a peek in `./Makefile` and `./doc/Makefile`.
+You can type `wangle --help` for a quick reminder of the command syntax.
+
+# How to Develop
+
+DO NOT EDIT the files in the `./src` subtree! They are all automatically
+generated from `./wangle.nw`.
 
 # Contents
 
 - @ref overview
-- @ref structure
-- __Scenarios__
+- @ref implementation
+  - @ref cli
+  - @ref structure
+  - @ref errors
+- @ref control
   - @ref initialisation
+  - @ref roots
   - @ref weave
   - @ref tangle
-  - @ref roots
+- @ref appendix
+  - @ref licence
+  - @ref files
 

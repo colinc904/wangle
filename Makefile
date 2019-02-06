@@ -15,23 +15,22 @@ help:
 #  Some global variables to be inherited by subirectory Makefiles
 # --------------------------------------------------------------------
 
+export WANGLE = wangle
 export TOPDIR = $(PWD)
 export DOCDIR = $(TOPDIR)/doc
 export SRCDIR = $(TOPDIR)/src
-export WANGLE = wangle
 
 # --------------------------------------------------------------------
 #  User-facing rules
 # --------------------------------------------------------------------
 
-NW = tmp.nw
+WANGLE = wangle
 
 .PHONY: tangle
 tangle:
-	cat doc/litprog/*.nw >$(NW)
-	for f in $$($(WANGLE) roots $(NW)); \
+	for f in $$($(WANGLE) roots wangle.nw); \
 	do \
-		$(WANGLE) tangle $(NW) $$f $(SRCDIR)/$$f; \
+		$(WANGLE) tangle wangle.nw $$f $(SRCDIR)/$$f; \
 	done
 
 .PHONY: build

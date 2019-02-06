@@ -22,39 +22,28 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 # 
 # For more information, please refer to <http://unlicense.org>
-
 import sets
-import streams
-
 import chunk
-import tangleresult
-import patterns
 
 type Clump* = ref object
-  chunks:    seq[Chunk]
-  includers: HashSet[string]
+  chunks:     seq[Chunk]
+  included*:  int
 
 proc newClump*(): Clump =
   new(result)
-  result.chunks = @[]
-  result.includers.init()
+  result.chunks = newSeq[Chunk]()
+  result.included = 0
 
 proc add*(self: Clump, chunk: Chunk) =
   self.chunks.add(chunk)
 
-iterator inclusions*(self: Clump): string =
+iterator pairs*(self: Clump): NumberedText =
   for chunk in self.chunks:
-    for name in chunk.inclusions:
-      yield name
+    for line, text in chunk:
+      yield (line, text)
 
-proc includedBy*(self: Clump, includer: string) =
-  self.includers.incl(includer)
-
-proc isRoot*(self: Clump): bool =
-  result = (len(self.includers) == 0)
-
-iterator tangle*(self: Clump): TangleResult =
+iterator inclusions*(self: Clump): NumberedText =
   for chunk in self.chunks:
-    for whatever in chunk.tangle():
-      yield whatever
+    for line, inclusion in chunk.inclusions:
+      yield (line, inclusion)
 

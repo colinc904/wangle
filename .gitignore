@@ -1,5 +1,4 @@
 wangle
 doc/html/
 doc/woven/*.md
-tests/test_patterns
-tests/test_roots
+tests/test_wangle

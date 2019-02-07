@@ -1,9 +1,12 @@
-# tests/test_patterns.nim
+# tests/test_wangle.nim
 
+import nre except toSeq
+import sequtils
+import streams
 import unittest
-import nre
 
 import wanglepkg/patterns
+import wanglepkg/web
 
 suite "CODE_INCLUDE":
   test "bad":
@@ -18,3 +21,26 @@ suite "CODE_INCLUDE":
     check get(m).captures["prefix"] == ""
     check get(m).captures["name"] == "x"
     check get(m).captures["suffix"] == ""
+
+suite "roots":
+  test "ummm":
+    let inputstr = """
+t1
+<<a>>=
+c1
+<<b>>
+c2
+@
+t2
+<<b>>=
+c3
+@
+"""
+
+    var input = newStringStream(inputstr)
+    var theWeb = newWebFrom(input)
+    var roots = sequtils.toSeq(theWeb.roots)
+   
+    check "a" in roots
+    check "b" notin roots
+

@@ -33,73 +33,50 @@ import clump
 import chunk
 import patterns
 type WangleError* = object of Exception
-type ContextKind = enum
-  toplevel
-  nested
-
 type Context* = ref object
-  case kind*: ContextKind
-  of toplevel:
-    givenName: string
-  of nested:
-    line*: int
-    match*: RegexMatch
-    context*:    Context
+  prefix*: string
+  name*:   string
+  suffix*: string
+  line:    int
+  context: Context
 
-proc toplevelContext(name: string): Context =
+proc info(self: Context): string
+proc newContext(name: string): Context =
   new(result)
-  result.kind = toplevel
-  result.givenName = name
+  result.prefix  = ""
+  result.name    = name
+  result.suffix  = ""
+  result.context = nil
 
-proc nestedContext(
-  line: int,
-  match: RegexMatch,
+proc newContext(
+  line:    int,
+  match:   RegexMatch,
   context: Context
 ): Context =
   new(result)
-  result.kind = nested
-  result.line = line
-  result.match = match
+  result.line    = line
   result.context = context
-
-proc prefix*(self: Context): string =
-  case self.kind
-  of toplevel:
-    result = ""
-  of nested:
-    result = self.match.captures["prefix"]
-
-proc name*(self: Context): string =
-  case self.kind
-  of toplevel:
-    result = self.givenName
-  of nested:
-    result = self.match.captures["name"]
-
-proc suffix*(self: Context): string =
-  case self.kind
-  of toplevel:
-    result = ""
-  of nested:
-    result = self.match.captures["suffix"]
+  result.prefix  = context.prefix & match.captures["prefix"]
+  result.name    = match.captures["name"]
+  result.suffix  = match.captures["suffix"] & context.suffix
 
 proc contains*(self: Context, name: string): bool =
   if name == self.name:
     result = true
-  elif self.kind == toplevel:
+  elif self.context == nil:
     result = false
   else:
     result = self.context.contains(name)
 
-proc info*(self: Context): string =
-  result = &"included in <{self.context.name}> at line {self.line}"
-
 iterator traceback*(self: Context): string =
   yield self.info
   var context = self.context
-  while context.kind == nested:
+  while context.context != nil:
     yield context.info
     context = context.context
+
+proc info(self: Context): string =
+  result = &"included in <{self.context.name}> at line {self.line}"
 
 type Web* = ref object
   doc:  seq[Chunk]
@@ -170,35 +147,34 @@ proc weave*(self: Web, output: Stream) =
     chunk.weave(output)
 
 proc tangle*(self: Web, name: string, output: Stream) =
-  let context = toplevelContext(name)
 
-  self.tangleClump(context, output)
+  if name notin self.code:
+    raise newException(WangleError, &"<{name}> not found")
+
+  self.tangleClump(newContext(name), output)
 
 proc tangleClump(
   self:    Web,
   context: Context,
   output:  Stream
 ) =
-  if context.name notin self:
-    raise newException(WangleError, &"<{context.name}> not found")
-
   for line, text in self[context.name]:
-    let codeInclude = text.match(CODE_INCLUDE)
 
+    let codeInclude = text.match(CODE_INCLUDE)
     if isSome(codeInclude):
-      let includee = get(codeInclude).captures["name"]
+      let match = get(codeInclude)
+      let includee = match.captures["name"]
       if includee in context:
-        var message = @[&"recursive inclusion of <{includee}>"]
-        message.add(&"included in <{context.name}> at line {line}")
+        var message = @[
+          &"circular inclusion of <{includee}>",
+          &"included in <{context.name}> at line {line}"
+        ]
         for text in context.traceback:
           message.add(text)
         raise newException(WangleError, strutils.join(message, "\n"))
+        
       else:
-        self.tangleClump(
-          nestedContext(line, get(codeInclude), context),
-          output
-        )
-
+        self.tangleClump(newContext(line, match, context), output)
     else:
       output.writeLine(context.prefix & text & context.suffix)
 

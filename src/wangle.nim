@@ -29,7 +29,7 @@ import docopt
 import wanglepkg/web
 
 
-const docstring = """
+const usage = """
 wangle - a minimal Literate Programming tool in the style of noweb
 
 Usage:
@@ -45,7 +45,7 @@ Options:
 
 try:
   var theWeb: Web
-  let args = docopt(docstring)
+  let args = docopt(usage)
   if args["WEB"]:
     let filename = $(args["WEB"])
     let input = newFileStream(filename)
@@ -83,7 +83,9 @@ try:
     let output = newFileStream(filename, fmWrite)
     if isNil(output):
       raise newException(WangleError, &"failed to open {filename}")
+  
     the_web.tangle($args["CHUNK"], output)
+  
     close(output)
     
   quit(QuitSuccess)

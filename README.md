@@ -1,5 +1,4 @@
-@mainpage notitle
-@anchor readme
+@mainpage README
 
 @internal
 

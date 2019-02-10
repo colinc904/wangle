@@ -1,6 +1,6 @@
-@page overview overview
+@page overview Overview
 
-up: @ref readme | next: @ref implementation
+up: @ref index | next: @ref implementation
 
 @section terminology Terminology
 
@@ -15,7 +15,7 @@ web, weave, tangle
 
 @page implementation Implementation
 
-previous: @ref overview | up: @ref readme | next: @ref control
+previous: @ref overview | up: @ref index | next: @ref control
 
 Contents
 
@@ -30,7 +30,7 @@ up: @ref implementation | next: @ref structure
 [nim version](https://github.com/docopt/docopt.nim)
 
 <<usage>>=
-const docstring = """
+const usage = """
 wangle - a minimal Literate Programming tool in the style of noweb
 
 Usage:
@@ -51,7 +51,7 @@ Options:
 
 try:
   var theWeb: Web
-  let args = docopt(docstring)
+  let args = docopt(usage)
   <<build the web>>
   <<handle commands>>
   quit(QuitSuccess)
@@ -70,44 +70,58 @@ let
 
 @page structure Data Structures
 
-previous: @ref cli | up: @ref implenemtation | next: @ref errors
+previous: @ref cli | up: @ref implementation | next: @ref errors
 
 @startuml
 
 class Chunk {
+  +name
   -line
-  name
   -body
-  newChunk()
-  add(text)
-  isCode()
-  pairs()
-  inclusions()
-  weave()
+  +newChunk()
+  +add(text)
+  +isCode()
+  +pairs()
+  +inclusions()
+  +weave()
 
 }
 
 class Clump {
-  chunks
-  included
-  newClump()
-  add(Chunk)
-  pairs()
-  inclusions()
+  -chunks
+  +included
+  +newClump()
+  +add(Chunk)
+  +pairs()
+  +inclusions()
+}
+
+class Context {
+  +prefix
+  +name
+  +suffix
+  -line
+  -kind
+  +newContext(name)
+  +newContext(line, match, context)
+  +contains(name)
+  +traceback()
+  -info()
 }
 
 class Web {
-  doc
-  code
-  newWebFrom()
-  roots()
-  weave(output)
-  tangle(name, output)
+  -doc
+  -code
+  +newWebFrom()
+  +roots()
+  +weave(output)
+  +tangle(name, output)
 }
 
 Clump o- Chunk
 Web *-- Clump
 Web *-- Chunk
+Web *-- Context
 
 @enduml
 
@@ -121,7 +135,7 @@ type WangleError* = object of Exception
 
 @page control Control Flows
 
-previous: @ref implementation | up: @ref readme | next: @ref appendix
+previous: @ref implementation | up: @ref index | next: @ref appendix
 
 Contents:
 - @ref initialisation
@@ -195,25 +209,6 @@ iterator pairs*(self: Clump): NumberedText =
   for chunk in self.chunks:
     for line, text in chunk:
       yield (line, text)
-
-@
-
-<<context type>>=
-type ContextKind = enum
-  toplevel
-  nested
-
-@
-
-<<context type>>=
-type Context* = ref object
-  case kind*: ContextKind
-  of toplevel:
-    givenName: string
-  of nested:
-    line*: int
-    match*: RegexMatch
-    context*:    Context
 
 @
 
@@ -315,7 +310,7 @@ proc gatherClumps(self: Web) =
 
 @
 
-@page roots roots
+@page roots Roots
 
 previous: @ref initialisation | up: @ref control | next: @ref weave
 
@@ -356,7 +351,7 @@ iterator inclusions*(self: Chunk): NumberedText =
 
 @
 
-@page weave weave
+@page weave Weave
 
 previous: @ref roots | up: @ref control | next: @ref tangle
 
@@ -398,9 +393,19 @@ proc weave*(self: Chunk, output: Stream) =
 
 @
 
-@page tangle tangle
+@page tangle Tangle
 
-previous: @ref weave | up: @ref readme | next: @ref appendix
+previous: @ref weave | up: @ref index | next: @ref appendix
+
+@section Overview
+
+Tangling in the term used for extracting a clump of code into a text file.
+
+The clump is identified by the CHUNK parameter (maybe rename this!) 
+and by default the code will be written to a file with the same name.
+
+The output filename can be given explicitly by the optional OUTPUT
+parameter.
 
 <<handle commands>>=
 if args["tangle"]:
@@ -414,18 +419,72 @@ if args["tangle"]:
   let output = newFileStream(filename, fmWrite)
   if isNil(output):
     raise newException(WangleError, &"failed to open {filename}")
+
   the_web.tangle($args["CHUNK"], output)
+
   close(output)
   
 @
 
-<<web procs>>=
-proc tangle*(self: Web, name: string, output: Stream) =
-  let context = toplevelContext(name)
+@section Context
 
-  self.tangleClump(context, output)
+<<context type>>=
+type Context* = ref object
+  prefix*: string
+  name*:   string
+  suffix*: string
+  line:    int
+  context: Context
 
 @
+
+<<context procs>>=
+proc newContext(name: string): Context =
+  new(result)
+  result.prefix  = ""
+  result.name    = name
+  result.suffix  = ""
+  result.context = nil
+
+@
+
+<<context procs>>=
+proc newContext(
+  line:    int,
+  match:   RegexMatch,
+  context: Context
+): Context =
+  new(result)
+  result.line    = line
+  result.context = context
+  result.prefix  = context.prefix & match.captures["prefix"]
+  result.name    = match.captures["name"]
+  result.suffix  = match.captures["suffix"] & context.suffix
+
+@
+
+Since code clumps can include other code clumps (which may in turn
+include yet more clumps), tangling is necessarily a recursive process.
+
+@section Tangling
+
+The `tangle` method is just a simple wrapper to start the process 
+from the top.
+
+We will use a 'Context` data structure to help keep track of the
+recursion, see below for details.
+
+<<web procs>>=
+proc tangle*(self: Web, name: string, output: Stream) =
+
+  if name notin self.code:
+    raise newException(WangleError, &"<{name}> not found")
+
+  self.tangleClump(newContext(name), output)
+
+@
+
+`tangleClump` is the actual recursive bit.
 
 <<web forward declarations>>=
 proc tangleClump(self: Web, context: Context, output: Stream)
@@ -438,97 +497,49 @@ proc tangleClump(
   context: Context,
   output:  Stream
 ) =
-  if context.name notin self:
-    raise newException(WangleError, &"<{context.name}> not found")
-
   for line, text in self[context.name]:
+
     let codeInclude = text.match(CODE_INCLUDE)
-
     if isSome(codeInclude):
-      let includee = get(codeInclude).captures["name"]
-      if includee in context:
-        var message = @[&"recursive inclusion of <{includee}>"]
-        message.add(&"included in <{context.name}> at line {line}")
-        for text in context.traceback:
-          message.add(text)
-        raise newException(WangleError, strutils.join(message, "\n"))
-      else:
-        self.tangleClump(
-          nestedContext(line, get(codeInclude), context),
-          output
-        )
-
+      <<handle an include>>
     else:
       output.writeLine(context.prefix & text & context.suffix)
 
 @
 
-<<context procs>>=
-proc toplevelContext(name: string): Context =
-  new(result)
-  result.kind = toplevel
-  result.givenName = name
-
+<<handle an include>>=
+let match = get(codeInclude)
+let includee = match.captures["name"]
+if includee in context:
+  <<raise an error for a circular include>>
+else:
+  self.tangleClump(newContext(line, match, context), output)
 @
 
-<<context procs>>=
-proc nestedContext(
-  line: int,
-  match: RegexMatch,
-  context: Context
-): Context =
-  new(result)
-  result.kind = nested
-  result.line = line
-  result.match = match
-  result.context = context
-
-@
-
-<<context procs>>=
-proc prefix*(self: Context): string =
-  case self.kind
-  of toplevel:
-    result = ""
-  of nested:
-    result = self.match.captures["prefix"]
-
-@
-
-<<context procs>>=
-proc name*(self: Context): string =
-  case self.kind
-  of toplevel:
-    result = self.givenName
-  of nested:
-    result = self.match.captures["name"]
-
-@
-
-<<context procs>>=
-proc suffix*(self: Context): string =
-  case self.kind
-  of toplevel:
-    result = ""
-  of nested:
-    result = self.match.captures["suffix"]
-
-@
+The 'contains' procedure allow the use of the 'in' operator 
+in the code above.
 
 <<context procs>>=
 proc contains*(self: Context, name: string): bool =
   if name == self.name:
     result = true
-  elif self.kind == toplevel:
+  elif self.context == nil:
     result = false
   else:
     result = self.context.contains(name)
 
 @
 
-<<context procs>>=
-proc info*(self: Context): string =
-  result = &"included in <{self.context.name}> at line {self.line}"
+@section xxx Error Handling
+
+<<raise an error for a circular include>>=
+var message = @[
+  &"circular inclusion of <{includee}>",
+  &"included in <{context.name}> at line {line}"
+]
+for text in context.traceback:
+  message.add(text)
+raise newException(WangleError, strutils.join(message, "\n"))
 
 @
 
@@ -536,15 +547,27 @@ proc info*(self: Context): string =
 iterator traceback*(self: Context): string =
   yield self.info
   var context = self.context
-  while context.kind == nested:
+  while context.context != nil:
     yield context.info
     context = context.context
 
 @
 
+<<context forward declarations>>=
+proc info(self: Context): string
+@
+
+<<context procs>>=
+proc info(self: Context): string =
+  result = &"included in <{self.context.name}> at line {self.line}"
+
+@
+
+previous: @ref weave | up: @ref index | next: @ref appendix
+
 @page appendix Appendix
 
-previous: @ref control | up: @ref readme
+previous: @ref control | up: @ref index
 
 contents
 
@@ -685,6 +708,7 @@ import chunk
 import patterns
 <<exception type>>
 <<context type>>
+<<context forward declarations>>
 <<context procs>>
 <<web type>>
 

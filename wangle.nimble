@@ -11,4 +11,5 @@ bin           = @["wangle"]
 # Dependencies
 
 requires "nim >= 0.19.2"
+requires "regex >= 0.12.0"
 requires "docopt"

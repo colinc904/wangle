@@ -22,8 +22,6 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 # 
 # For more information, please refer to <http://unlicense.org>
-# import nre
-import sets
 import streams
 import strformat
 import strutils

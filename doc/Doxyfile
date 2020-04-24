@@ -235,7 +235,6 @@ LATEX_BIB_STYLE        = plain
 #----------------------------------------------------------------------
 
 CLASS_DIAGRAMS         = NO
-MSCGEN_PATH            = 
 DIA_PATH               = 
 HIDE_UNDOC_RELATIONS   = YES
 HAVE_DOT               = YES

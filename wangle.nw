@@ -362,7 +362,7 @@ if args["weave"]:
   if args["OUTPUT"]:
     filename = $(args["OUTPUT"])
   else:
-    filename = changeFileExt(ospaths.extractFilename($(args["WEB"])), "md")
+    filename = changeFileExt(os.extractFilename($(args["WEB"])), "md")
 
   let output = newFileStream(filename, fmWrite)
   if isNil(output):
@@ -625,7 +625,7 @@ digraph imports {
     node[shape=box,width=1.0,height=0.3]
     docopt
     nre
-    ospaths
+    os
     streams
     strformat
     strutils
@@ -634,7 +634,7 @@ digraph imports {
 
   chunk -> streams
   chunk -> patterns
-  cli -> ospaths
+  cli -> os
   cli -> streams
   cli -> strformat
   cli -> docopt
@@ -653,7 +653,7 @@ digraph imports {
 
 <<wangle.nim>>=
 # <<LICENCE>>
-import ospaths
+import os
 import streams
 import strformat
 import docopt
@@ -661,6 +661,13 @@ import wanglepkg/web
 
 <<cli>>
 @
+
+Everywhere that the patterns are used, you will need the `nre` package
+to process them, so we might as well export it here, and save the users
+from havinf to import it themselves.
+
+I don't know what the problem with `toSeq` is, but the doc. suggests
+excluding it, so I did.
 
 <<wanglepkg/patterns.nim>>=
 # <<LICENCE>>
@@ -686,7 +693,6 @@ import patterns
 
 <<wanglepkg/clump.nim>>=
 # <<LICENCE>>
-import sets
 import chunk
 
 <<clump type>>
@@ -696,8 +702,6 @@ import chunk
 
 <<wanglepkg/web.nim>>=
 # <<LICENCE>>
-# import nre
-import sets
 import streams
 import strformat
 import strutils

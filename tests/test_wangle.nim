@@ -8,8 +8,6 @@ import unittest
 
 import wanglepkg/patterns
 import wanglepkg/web
-import wanglepkg/chunk
-import wanglepkg/clump
 
 proc newWebFrom(lines: seq[string]): Web =
   result = newWebFrom(newStringStream(strutils.join(lines, "\n")))

@@ -22,7 +22,7 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 # 
 # For more information, please refer to <http://unlicense.org>
-import ospaths
+import os
 import streams
 import strformat
 import docopt
@@ -64,7 +64,7 @@ try:
     if args["OUTPUT"]:
       filename = $(args["OUTPUT"])
     else:
-      filename = changeFileExt(ospaths.extractFilename($(args["WEB"])), "md")
+      filename = changeFileExt(os.extractFilename($(args["WEB"])), "md")
   
     let output = newFileStream(filename, fmWrite)
     if isNil(output):
